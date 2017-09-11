@@ -1,13 +1,13 @@
 AES for Lua 5.3
 -----------
 
-This files contain an implementation of AES in Lua 5.3.
+This library contains an implementation of AES in Lua 5.3.
 It is based on Matthias Hilbig's aeslua, which made use of the "bitlib" library, but has been updated to use Lua 5.3's native bitwise operators.
 
 Usage
 -----
 
-aeslua.lua contains a simple API to encrypt and decrypt lua strings.
+aeslua provides a simple API to encrypt and decrypt lua strings.
 
 To encrypt the string "secret" with the password "password" use:
 
