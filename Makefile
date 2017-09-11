@@ -21,12 +21,6 @@ dist:
 	tar cvzf $(DIST).tar.gz $(DIST)
 	zip -9 -r $(DIST).zip $(DIST)
 	
-install:
-	mkdir -p $(LIBDIR)
-	cp -p src/aeslua.lua $(LIBDIR)
-	mkdir -p $(LIBDIR)/aeslua 
-	for i in $(SUBMODULES); do cp -p src/aeslua/$$i.lua $(LIBDIR)/aeslua; done
-
 uninstall:
 	rm -rf $(LIBDIR)/aeslua $(LIBDIR)/aeslua.lua
 

@@ -1,8 +1,2 @@
 Version 0.1:
-	- first public release
-Version 0.2:
-	- removed utility classes from global namespace (Norman Ramsey)
-	- moved ciphermodes into one file
-	- restructured file layout
-Version 0.2.1:
-        - updated email address	
+ - Forked aeslua to aeslua5.3, updated to use native bitwise operations
