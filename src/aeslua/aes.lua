@@ -1,5 +1,3 @@
-require("bit");
-
 local gf = require("aeslua.gf");
 local util = require("aeslua.util");
 
@@ -60,22 +58,22 @@ function private.affinMap(byte)
     mask = 0xf8;
     result = 0;
     for i = 1,8 do
-        result = bit.lshift(result,1);
+        result = result << 1;
 
-        parity = util.byteParity(bit.band(byte,mask)); 
+        parity = util.byteParity(byte & mask); 
         result = result + parity
 
         -- simulate roll
-        lastbit = bit.band(mask, 1);
-        mask = bit.band(bit.rshift(mask, 1),0xff);
+        lastbit = mask & 1;
+        mask = (mask >> 1) & 0xff;
         if (lastbit ~= 0) then
-            mask = bit.bor(mask, 0x80);
+            mask = mask | 0x80;
         else
-            mask = bit.band(mask, 0x7f);
+            mask = mask & 0x7f;
         end
     end
 
-    return bit.bxor(result, 0x63);
+    return result ~ 0x63;
 end
 
 --
@@ -155,8 +153,8 @@ end
 -- used for key schedule
 --
 function private.rotWord(word)
-    local tmp = bit.band(word,0xff000000);
-    return (bit.lshift(word,8) + bit.rshift(tmp,24)) ;
+    local tmp = word & 0xff000000;
+    return ((word << 8) + (tmp >> 24)) ;
 end
 
 --
@@ -204,12 +202,12 @@ function public.expandEncryptionKey(key)
             tmp = private.subWord(tmp);
             
             local index = math.floor(i/keyWords);
-            tmp = bit.bxor(tmp,private.rCon[index]);
+            tmp = (tmp ~ private.rCon[index]);
         elseif (keyWords > 6 and i % keyWords == 4) then
             tmp = private.subWord(tmp);
         end
         
-        keySchedule[i] = bit.bxor(keySchedule[(i-keyWords)],tmp);
+        keySchedule[i] = (keySchedule[(i-keyWords)] ~ tmp);
     end
 
     return keySchedule;
@@ -254,17 +252,17 @@ function private.invMixColumn(word)
     local b2 = util.getByte(word,1);
     local b3 = util.getByte(word,0);
     
-    local t = bit.bxor(b3,b2);
-    local u = bit.bxor(b1,b0);
-    local v = bit.bxor(t,u);
-    v = bit.bxor(v,gf.mul(0x08,v));
-    w = bit.bxor(v,gf.mul(0x04, bit.bxor(b2,b0)));
-    v = bit.bxor(v,gf.mul(0x04, bit.bxor(b3,b1)));
+    local t = (b3 ~ b2);
+    local u = (b1 ~ b0);
+    local v = (t ~ u);
+    v = (v ~ gf.mul(0x08,v));
+    w = (v ~ gf.mul(0x04, (b2 ~ b0)));
+    v = (v ~ gf.mul(0x04, (b3 ~ b1)));
     
-    return util.putByte( bit.bxor(bit.bxor(b3,v), gf.mul(0x02, bit.bxor(b0,b3))), 0)
-         + util.putByte( bit.bxor(bit.bxor(b2,w), gf.mul(0x02, t              )), 1)
-         + util.putByte( bit.bxor(bit.bxor(b1,v), gf.mul(0x02, bit.bxor(b0,b3))), 2)
-         + util.putByte( bit.bxor(bit.bxor(b0,w), gf.mul(0x02, u              )), 3);
+    return util.putByte( ((b3 ~ v) ~ gf.mul(0x02, (b0 ~ b3)      )), 0)
+         + util.putByte( ((b2 ~ w) ~ gf.mul(0x02, t              )), 1)
+         + util.putByte( ((b1 ~ v) ~ gf.mul(0x02, (b0 ~ b3)      )), 2)
+         + util.putByte( ((b0 ~ w) ~ gf.mul(0x02, u              )), 3);
 end
 
 --
@@ -293,7 +291,7 @@ end
 --
 function private.addRoundKey(state, key, round)
     for i = 0, 3 do
-        state[i] = bit.bxor(state[i], key[round*4+i]);
+        state[i] = (state[i] ~ key[round*4+i]);
     end
 end
 
@@ -301,28 +299,28 @@ end
 -- do encryption round (ShiftRow, SubBytes, MixColumn together)
 --
 function private.doRound(origState, dstState)
-    dstState[0] =  bit.bxor(bit.bxor(bit.bxor(
-                private.table0[util.getByte(origState[0],3)],
-                private.table1[util.getByte(origState[1],2)]),
-                private.table2[util.getByte(origState[2],1)]),
+    dstState[0] = (((
+                private.table0[util.getByte(origState[0],3)] ~
+                private.table1[util.getByte(origState[1],2)]) ~
+                private.table2[util.getByte(origState[2],1)]) ~
                 private.table3[util.getByte(origState[3],0)]);
 
-    dstState[1] =  bit.bxor(bit.bxor(bit.bxor(
-                private.table0[util.getByte(origState[1],3)],
-                private.table1[util.getByte(origState[2],2)]),
-                private.table2[util.getByte(origState[3],1)]),
+    dstState[1] = (((
+                private.table0[util.getByte(origState[1],3)] ~
+                private.table1[util.getByte(origState[2],2)]) ~
+                private.table2[util.getByte(origState[3],1)]) ~
                 private.table3[util.getByte(origState[0],0)]);
     
-    dstState[2] =  bit.bxor(bit.bxor(bit.bxor(
-                private.table0[util.getByte(origState[2],3)],
-                private.table1[util.getByte(origState[3],2)]),
-                private.table2[util.getByte(origState[0],1)]),
+    dstState[2] = (((
+                private.table0[util.getByte(origState[2],3)] ~
+                private.table1[util.getByte(origState[3],2)]) ~
+                private.table2[util.getByte(origState[0],1)]) ~
                 private.table3[util.getByte(origState[1],0)]);
     
-    dstState[3] =  bit.bxor(bit.bxor(bit.bxor(
-                private.table0[util.getByte(origState[3],3)],
-                private.table1[util.getByte(origState[0],2)]),
-                private.table2[util.getByte(origState[1],1)]),
+    dstState[3] = (((
+                private.table0[util.getByte(origState[3],3)] ~
+                private.table1[util.getByte(origState[0],2)]) ~
+                private.table2[util.getByte(origState[1],1)]) ~
                 private.table3[util.getByte(origState[2],0)]);
 end
 
@@ -355,28 +353,28 @@ end
 -- do decryption round 
 --
 function private.doInvRound(origState, dstState)
-    dstState[0] =  bit.bxor(bit.bxor(bit.bxor(
-                private.tableInv0[util.getByte(origState[0],3)],
-                private.tableInv1[util.getByte(origState[3],2)]),
-                private.tableInv2[util.getByte(origState[2],1)]),
+    dstState[0] = (((
+                private.tableInv0[util.getByte(origState[0],3)] ~
+                private.tableInv1[util.getByte(origState[3],2)]) ~
+                private.tableInv2[util.getByte(origState[2],1)]) ~
                 private.tableInv3[util.getByte(origState[1],0)]);
 
-    dstState[1] =  bit.bxor(bit.bxor(bit.bxor(
-                private.tableInv0[util.getByte(origState[1],3)],
-                private.tableInv1[util.getByte(origState[0],2)]),
-                private.tableInv2[util.getByte(origState[3],1)]),
+    dstState[1] = (((
+                private.tableInv0[util.getByte(origState[1],3)] ~
+                private.tableInv1[util.getByte(origState[0],2)]) ~
+                private.tableInv2[util.getByte(origState[3],1)]) ~
                 private.tableInv3[util.getByte(origState[2],0)]);
     
-    dstState[2] =  bit.bxor(bit.bxor(bit.bxor(
-                private.tableInv0[util.getByte(origState[2],3)],
-                private.tableInv1[util.getByte(origState[1],2)]),
-                private.tableInv2[util.getByte(origState[0],1)]),
+    dstState[2] = (((
+                private.tableInv0[util.getByte(origState[2],3)] ~
+                private.tableInv1[util.getByte(origState[1],2)]) ~
+                private.tableInv2[util.getByte(origState[0],1)]) ~
                 private.tableInv3[util.getByte(origState[3],0)]);
     
-    dstState[3] =  bit.bxor(bit.bxor(bit.bxor(
-                private.tableInv0[util.getByte(origState[3],3)],
-                private.tableInv1[util.getByte(origState[2],2)]),
-                private.tableInv2[util.getByte(origState[1],1)]),
+    dstState[3] = (((
+                private.tableInv0[util.getByte(origState[3],3)] ~
+                private.tableInv1[util.getByte(origState[2],2)]) ~
+                private.tableInv2[util.getByte(origState[1],1)]) ~
                 private.tableInv3[util.getByte(origState[0],0)]);
 end
 

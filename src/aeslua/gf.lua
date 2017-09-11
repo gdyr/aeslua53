@@ -1,5 +1,3 @@
-require("bit");
-
 -- finite field with base 2 and modulo irreducible polynom x^8+x^4+x^3+x+1 = 0x11d
 local private = {};
 local public = {};
@@ -17,14 +15,14 @@ private.log = {};
 -- add two polynoms (its simply xor)
 --
 function public.add(operand1, operand2) 
-	return bit.bxor(operand1,operand2);
+	return (operand1 ~ operand2);
 end
 
 -- 
 -- subtract two polynoms (same as addition)
 --
 function public.sub(operand1, operand2) 
-	return bit.bxor(operand1,operand2);
+	return (operand1 ~ operand2);
 end
 
 --
@@ -102,7 +100,7 @@ function private.initMulTable()
 		private.log[a] = i;
 
 		-- multiply with generator x+1 -> left shift + 1	
-		a = bit.bxor(bit.lshift(a, 1), a);
+		a = ((a << 1) ~ a);
 
 		-- if a gets larger than order, reduce modulo irreducible polynom
 		if a > private.ord then

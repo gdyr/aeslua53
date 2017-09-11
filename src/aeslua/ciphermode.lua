@@ -23,7 +23,12 @@ function public.encryptString(key, data, modeFunction)
 		
         modeFunction(keySched, byteData, iv);
 
-        buffer.addString(encryptedData, string.char(unpack(byteData)));    
+        local unpackedString = '';
+        for i=1,#byteData do
+            unpackedString = unpackedString .. string.char(byteData[i]);
+        end;
+
+        buffer.addString(encryptedData, unpackedString);    
     end
     
     return buffer.toString(encryptedData);
@@ -90,7 +95,12 @@ function public.decryptString(key, data, modeFunction)
 
 		iv = modeFunction(keySched, byteData, iv);
 
-        buffer.addString(decryptedData, string.char(unpack(byteData)));
+        local unpackedString = '';
+        for i=1,#byteData do
+            unpackedString = unpackedString .. string.char(byteData[i]);
+        end;
+
+        buffer.addString(decryptedData, unpackedString);
     end
 
     return buffer.toString(decryptedData);    

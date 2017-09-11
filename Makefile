@@ -1,5 +1,5 @@
-DIST=aeslua-0.2.1
-LIBDIR=/usr/local/lib/lua/5.1
+DIST=aeslua53-0.0.1
+LIBDIR=/usr/local/lib/lua/5.3
 
 SUBMODULES=aes buffer ciphermode gf util
 
@@ -31,8 +31,8 @@ uninstall:
 	rm -rf $(LIBDIR)/aeslua $(LIBDIR)/aeslua.lua
 
 test:
-	echo "print(aeslua.decrypt('key', aeslua.encrypt('key', 'hello world')))" | LUA_PATH="src/?.lua" lua5.1 -laeslua -lbit
-	LUA_PATH="src/?.lua" lua5.1 -laeslua -lbit src/test/testaes.lua
+	echo "require('aeslua'); print(aeslua.decrypt('key', aeslua.encrypt('key', 'hello world')))" | LUA_PATH="src/?.lua" lua5.3
+	LUA_PATH="src/?.lua" lua5.3 src/test/testaes.lua
 
 speed:
-	LUA_PATH="src/?.lua" lua5.1 -laeslua -lbit src/test/aesspeed.lua
+	LUA_PATH="src/?.lua" lua5.3 src/test/aesspeed.lua
