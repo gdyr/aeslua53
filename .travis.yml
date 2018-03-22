@@ -5,11 +5,11 @@ sudo: false      # Use container-based infrastructure.
 env:
   - LUA="lua 5.3"
 
-#before_install:
+before_install:
   - pip install hererocks
   - hererocks env --$LUA -rlatest    # Use latest LuaRocks, install into 'env' directory.
   - source env/bin/activate          # Add directory with all installed binaries to PATH.
-#  - luarocks install busted
+  - luarocks install busted luacrypto
 
 script:
   - make test
