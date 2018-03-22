@@ -25,8 +25,8 @@ uninstall:
 	rm -rf $(LIBDIR)/aeslua $(LIBDIR)/aeslua.lua
 
 test:
-	echo "require('aeslua'); print(aeslua.decrypt('key', aeslua.encrypt('key', 'hello world')))" | LUA_PATH="src/?.lua" lua5.3
-	LUA_PATH="src/?.lua" lua5.3 src/test/testaes.lua
+	echo "require('aeslua'); print(aeslua.decrypt('key', aeslua.encrypt('key', 'hello world')))" | LUA_PATH="src/?.lua" lua
+	LUA_PATH="src/?.lua" lua src/test/testaes.lua
 
 speed:
-	LUA_PATH="src/?.lua" lua5.3 src/test/aesspeed.lua
+	LUA_PATH="src/?.lua" lua src/test/aesspeed.lua
